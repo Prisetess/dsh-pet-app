@@ -19,6 +19,11 @@
 
 > 作者：等鱼的心跳 · 许可证：MIT（见 `LICENSE`，第三方组件见 `THIRD-PARTY.md`）
 
+> **本项目是 [dsh-pet](https://github.com/PC2005-cloud/dsh-pet) 的二次创作（独立外壳）**<br>
+> 原作者：**PC2005-cloud** · 原仓库：**https://github.com/PC2005-cloud/dsh-pet**<br>
+> 桌宠动画素材版权归 dsh-pet 原作者所有：**允许开源使用，禁止商用**。<br>
+> 本项目免费开源分发，不用于任何商业用途；与原作者无隶属或背书关系。
+
 ---
 
 ## 功能一览（当前版本）

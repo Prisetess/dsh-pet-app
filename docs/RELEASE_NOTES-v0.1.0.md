@@ -1,5 +1,9 @@
 **把 dsh-pet 桌宠做成独立的 Windows 软件：不装 DSH 也能双击运行。**
 
+> 本项目是 [dsh-pet](https://github.com/PC2005-cloud/dsh-pet) 的二次创作（MIT 外壳）<br>
+> 原作者：**PC2005-cloud** · 原仓库：**https://github.com/PC2005-cloud/dsh-pet**<br>
+> 桌宠动画素材：允许开源使用、**禁止商用**；本项目免费分发，不用于商业用途。
+
 ![DSH Pet](https://raw.githubusercontent.com/Prisetess/dsh-pet-app/main/docs/hero.png)
 
 ## 下载
