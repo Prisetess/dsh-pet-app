@@ -29,13 +29,14 @@ jobs:
       - name: Assert patches landed
         shell: pwsh
         run: |
-          $sprite = 'vendor/plugin/runtime/electron-helper/sprite.js'
-          $host = 'vendor/plugin/lib/index.js'
-          foreach ($probe in @(
-            @{ File = $sprite; Needle = "action: 'settings'"; Label = 'sprite menu: settings' },
-            @{ File = $sprite; Needle = 'size-larger'; Label = 'sprite menu: size submenu' },
-            @{ File = $host;   Needle = 'DSH_PET_EMBEDDED'; Label = 'host: embedded mode' }
-          )) {
+          $spriteFile = 'vendor/plugin/runtime/electron-helper/sprite.js'
+          $hostFile = 'vendor/plugin/lib/index.js'   # 别用 $host：PowerShell 保留变量
+          $probes = @(
+            @{ File = $spriteFile; Needle = "action: 'settings'"; Label = 'sprite menu: settings' },
+            @{ File = $spriteFile; Needle = 'size-larger';        Label = 'sprite menu: size submenu' },
+            @{ File = $hostFile;   Needle = 'DSH_PET_EMBEDDED';   Label = 'host: embedded mode' }
+          )
+          foreach ($probe in $probes) {
             if (-not (Select-String -Path $probe.File -Pattern $probe.Needle -SimpleMatch -Quiet)) {
               throw "patch missing: $($probe.Label)"
             }
