@@ -16,10 +16,11 @@
  */
 import { copyFile, cp, mkdir, readFile, rm, writeFile, stat } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
-import { existsSync, readdirSync, rmSync, statSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { gunzipSync } from 'node:zlib';
 
 const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -82,6 +83,54 @@ async function downloadTarball(cacheDir) {
   return target;
 }
 
+/**
+ * 解 .tgz —— 不调用外部 tar。
+ * runner 上的 tar 可能是 MSYS/GNU 版，遇到 D:\a\... 这种反斜杠绝对路径会失败
+ * （实测 CI 报 Command failed: tar -xf ...），Windows 自带 bsdtar 行为又和 GNU 不同。
+ * npm 包的 tarball 一定是 ustar（name + prefix），用 zlib 自己解 60 行就够，且跨平台一致。
+ */
+function extractTarGz(archivePath, destination) {
+  const data = gunzipSync(readFileSync(archivePath));
+  const readField = (buffer, start, length) => {
+    const slice = buffer.subarray(start, start + length);
+    const end = slice.indexOf(0);
+    return slice.subarray(0, end === -1 ? slice.length : end).toString('utf8');
+  };
+
+  let offset = 0;
+  let extracted = 0;
+  while (offset + 512 <= data.length) {
+    const header = data.subarray(offset, offset + 512);
+    if (header.every((byte) => byte === 0)) break; // 两个全零块 = 结束
+
+    const name = readField(header, 0, 100);
+    const prefix = readField(header, 345, 155);
+    const sizeField = readField(header, 124, 12).trim();
+    const size = sizeField ? parseInt(sizeField, 8) : 0;
+    const type = String.fromCharCode(header[156] || 0x30);
+    const relative = (prefix ? prefix + '/' : '') + name;
+
+    offset += 512;
+    const content = data.subarray(offset, offset + size);
+    offset += Math.ceil(size / 512) * 512;
+
+    if (!relative || relative.includes('..')) continue; // 防目录穿越
+    const target = path.join(destination, relative);
+
+    if (type === '5' || relative.endsWith('/')) {
+      mkdirSync(target, { recursive: true });
+      continue;
+    }
+    if (type !== '0' && type !== '\u0000' && type !== '') continue; // 跳过链接等特殊项
+
+    mkdirSync(path.dirname(target), { recursive: true });
+    writeFileSync(target, content);
+    extracted += 1;
+  }
+  if (extracted === 0) throw new Error('tarball 解包后没有任何文件');
+  return extracted;
+}
+
 /** 用 npm pack（或直接下载）把指定版本拉到 vendor/.cache 并解包，返回 package 目录 */
 async function fetchPluginFromNpm() {
   const cacheDir = path.join(vendorRoot, '.cache');
@@ -107,7 +156,8 @@ async function fetchPluginFromNpm() {
     if (!archive) archive = await downloadTarball(cacheDir);
     log(`已获取 ${path.basename(archive)}（${(statSync(archive).size / 1024 / 1024).toFixed(1)} MB），解包…`);
 
-    execFileSync('tar', ['-xf', archive, '-C', cacheDir], { stdio: 'inherit' });
+    const files = extractTarGz(archive, cacheDir);
+    log(`解包 ${files} 个文件`);
     const packageDir = path.join(cacheDir, 'package');
     if (!existsSync(packageDir)) throw new Error('解包后没有 package 目录');
     return packageDir;
