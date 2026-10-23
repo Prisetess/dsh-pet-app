@@ -2,6 +2,17 @@
 
 本项目是 `dsh-pet` 插件的**独立 Windows 外壳**：外壳代码是本仓库的，桌宠的渲染、物理、动画全部来自原插件。
 
+## 0. 授权范围（LICENSE 覆盖到哪里）
+
+`LICENSE` 里的 MIT 许可覆盖本仓库作者编写的代码与文档（`src/`、`scripts/`、`ui/`、`docs/`）。
+不属于该许可的内容：
+
+| 内容 | 授权 |
+|---|---|
+| `vendor/` 中的 dsh-pet 插件（由 `npm run vendor` 生成，不入库） | MIT，版权归 dsh-pet 原作者（见下） |
+| Electron / Chromium / Node.js | 各自许可证 |
+| `ui/guide.png`、`docs/hero.png` | 作者等鱼的心跳原创，随本仓库以 MIT 一同发布 |
+
 ## 1. dsh-pet（核心，MIT）
 
 | 项 | 内容 |

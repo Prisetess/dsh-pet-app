@@ -19,14 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-本许可证只覆盖本仓库作者编写的代码（src/、scripts/、ui/ 中的源码与文档）。
-
-不属于本许可证范围的内容：
-
-1. third-party 目录/vendor 中的 dsh-pet 插件（MIT，版权归原作者，见 THIRD-PARTY.md）；
-2. 运行时依赖 Electron / Chromium / Node.js，各自遵循其自身许可证。
-
-`ui/guide.png` / `docs/hero.png` 由作者等鱼的心跳原创，随本仓库一同以 MIT 许可发布。
