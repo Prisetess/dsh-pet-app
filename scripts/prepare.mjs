@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 准备 vendor/plugin —— 把已安装的 dsh-pet 复制进来并打两个小补丁。
  *
  * 为什么要复制而不是直接引用 node_modules：
@@ -16,7 +16,7 @@
  */
 import { copyFile, cp, mkdir, readFile, rm, writeFile, stat } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync, rmSync, statSync } from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -43,19 +43,70 @@ function defaultPluginRoot() {
   return path.join(os.homedir(), '.dsh', 'profiles', 'desktop', 'node_modules', 'dsh-pet');
 }
 
-/** 用 npm pack 把指定版本拉到 vendor/.cache 并解包，返回 package 目录 */
+/**
+ * 拿插件 tarball 的两条路（都踩过坑，所以按顺序回退）：
+ *
+ * 1. `node <npm-cli.js> pack ...` —— 不用 cmd、不用 npm.cmd。
+ *    Windows 上 Node 20+ 拒绝直接 spawn .cmd（CVE-2024-27980 → ENOENT/EINVAL），
+ *    而 `cmd /c npm pack "pkg"` 会把引号原样传给 npm（报 Unknown command: ""pack"" /
+ *    Invalid package name）。直接调 npm 的 JS 入口绕开这两个问题，同时仍遵守 npm 的
+ *    registry / 代理配置。
+ * 2. 直接下载 tarball（Node 20+ 自带 fetch）—— npm 入口不存在时兜底。
+ */
+const REGISTRY = process.env.DSH_PET_REGISTRY || 'https://registry.npmjs.org';
+
+function findNpmCli() {
+  const candidate = path.join(path.dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npm-cli.js');
+  return existsSync(candidate) ? candidate : null;
+}
+
+function clearTarballs(cacheDir) {
+  for (const name of readdirSync(cacheDir)) {
+    if (name.endsWith('.tgz')) rmSync(path.join(cacheDir, name), { force: true });
+  }
+}
+
+function pickTarball(cacheDir) {
+  const tgz = readdirSync(cacheDir).find((name) => name.endsWith('.tgz'));
+  return tgz ? path.join(cacheDir, tgz) : null;
+}
+
+async function downloadTarball(cacheDir) {
+  const url = `${REGISTRY}/dsh-pet/-/dsh-pet-${PLUGIN_VERSION}.tgz`;
+  log('回退到直接下载：' + url);
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`下载失败 HTTP ${response.status}（${url}）`);
+  const buffer = Buffer.from(await response.arrayBuffer());
+  const target = path.join(cacheDir, `dsh-pet-${PLUGIN_VERSION}.tgz`);
+  await writeFile(target, buffer);
+  return target;
+}
+
+/** 用 npm pack（或直接下载）把指定版本拉到 vendor/.cache 并解包，返回 package 目录 */
 async function fetchPluginFromNpm() {
   const cacheDir = path.join(vendorRoot, '.cache');
   await mkdir(cacheDir, { recursive: true });
-  log(`本机没有安装 dsh-pet，尝试从 npm 下载 ${PLUGIN_VERSION}…`);
+  clearTarballs(cacheDir);
+  log(`本机没有安装 dsh-pet，尝试获取 dsh-pet@${PLUGIN_VERSION}…`);
+
   try {
-    const output = execFileSync('npm', ['pack', `dsh-pet@${PLUGIN_VERSION}`, '--pack-destination', cacheDir], {
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
-    const tgz = output.trim().split('\n').filter(Boolean).pop();
-    const archive = path.join(cacheDir, tgz);
-    if (!existsSync(archive)) throw new Error('npm pack 没有产出 tgz');
+    const npmCli = findNpmCli();
+    if (npmCli) {
+      try {
+        // stdio 忽略：npm 会打印整份 tarball 清单（294 个文件），pipe 解析容易撞 maxBuffer
+        execFileSync(process.execPath, [npmCli, 'pack', `dsh-pet@${PLUGIN_VERSION}`, '--pack-destination', cacheDir], {
+          stdio: 'ignore',
+          windowsHide: true,
+        });
+      } catch (error) {
+        log('npm pack 失败，改用直接下载：' + (error instanceof Error ? error.message.split('\n')[0] : String(error)));
+      }
+    }
+
+    let archive = pickTarball(cacheDir);
+    if (!archive) archive = await downloadTarball(cacheDir);
+    log(`已获取 ${path.basename(archive)}（${(statSync(archive).size / 1024 / 1024).toFixed(1)} MB），解包…`);
+
     execFileSync('tar', ['-xf', archive, '-C', cacheDir], { stdio: 'inherit' });
     const packageDir = path.join(cacheDir, 'package');
     if (!existsSync(packageDir)) throw new Error('解包后没有 package 目录');
@@ -69,6 +120,8 @@ async function fetchPluginFromNpm() {
         '  1) 装一次 DSH 桌宠插件（dsh-pet），让 ~/.dsh/profiles/desktop/node_modules/dsh-pet 存在；',
         `  2) 手动下载：npm pack dsh-pet@${PLUGIN_VERSION}，解包后把 package 目录复制到 vendor/plugin；`,
         '  3) 设置环境变量 DSH_PET_PLUGIN_ROOT 指向已有的 dsh-pet 目录。',
+        '',
+        '（走代理时记得同时设置 https_proxy 与 HTTPS_PROXY，npm 才认）',
       ].join('\n'),
     );
   }
