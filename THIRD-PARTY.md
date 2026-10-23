@@ -38,6 +38,10 @@
 
 代码部分遵循 MIT：保留原许可证与版权声明，并在此列明改动。
 
+上游自带的独立启动入口：`dsh-pet-standalone`（`lib/standalone.js`，bin 名 `dsh-pet-standalone`）。
+本项目复用了它的 helper 与环境变量契约（`DSH_PET_PETS` / `DSH_PET_CONFIG_URL` / `DSH_PET_BRIDGE`），
+只是把"命令行 + 两个进程"改成了"安装包 + 单进程 + 图形界面"。
+
 ### 我们对「二创约定」的履行情况
 
 | 要求 | 我们的做法 |

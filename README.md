@@ -26,6 +26,25 @@
 
 ---
 
+## 与上游的关系
+
+上游 `dsh-pet` **本身已经支持命令行独立启动**：`npx dsh-pet-standalone`
+（依赖 Node 20+；首次运行会用 `@electron/get` 把 Electron 43.3.0 下到 `~/.dsh/electron`）。
+
+本项目在这个能力之上做了 Windows 打包与图形化：
+
+| 维度 | 上游 `npx dsh-pet-standalone` | 本项目 |
+|---|---|---|
+| 启动方式 | 命令行 | 双击 `DSH Pet.exe` / 桌面快捷方式 |
+| 前置依赖 | Node 20+、能 `npm install` | 零依赖（安装包自带 Electron） |
+| 进程模型 | 本地 HTTP 服务 + Electron helper（2 个进程） | 宿主嵌在 Electron 主进程里（1 个进程） |
+| 配置方式 | 手改 `~/.dsh/dsh-pet/main-config.jsonc` | 图形设置页（宠物 / 桌面行为 / 物理 / 通用 / 统计，带搜索） |
+| 系统集成 | 无 | 托盘、右键大小调节、开机自启、安装包与卸载项 |
+| 额外功能 | — | 位置记忆、全屏自动隐藏、互动统计、首次运行引导 |
+
+实现方式：`scripts/prepare.mjs` 在复制插件时加了一个 `DSH_PET_EMBEDDED=1` 分支，
+让宿主不再自己 spawn Electron helper —— 窗口改由本项目主进程创建，于是设置页、托盘、自启才能接管。
+
 ## 功能一览（当前版本）
 
 **图标**
