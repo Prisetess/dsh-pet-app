@@ -1,0 +1,34 @@
+# --- 构建产物（体积大、可重建，绝不进仓库）---
+build/
+dist/
+*.zip
+*.7z
+*.exe
+*.msi
+*.lnk
+*.log
+
+# --- 生成的插件副本 ---
+# `npm run vendor` 会把 dsh-pet 复制进 vendor/plugin 并打补丁；
+# 它包含 60MB 素材、且带第三方代码，所以不入库，靠脚本重建。
+vendor/
+
+# --- 由脚本生成的图标（源图是 ui/guide.png）---
+ui/app.ico
+
+# --- 本地测试 / 部署残留 ---
+.testhome/
+.logs/
+logs/
+
+# --- Node ---
+node_modules/
+ui-react/dist/
+
+# --- 编辑器 / 系统 ---
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+desktop.ini
+.DS_Store

@@ -1,0 +1,24 @@
+/* 官方设置页（React 版）用的 DSH 语义 token。
+ *
+ * 插件的 settings.ts 全程使用 --dsw-alias-* 变量（在 DSH 里由主题提供），
+ * 独立窗口没有 DSH 主题，所以这里给一份与本 App 深色主题一致的兜底取值。 */
+:root {
+  --dsw-alias-bg-layer-1: #15171c;
+  --dsw-alias-border-l1: #24262d;
+  --dsw-alias-border-l2: #30333c;
+  --dsw-alias-label-primary: #e8eaf0;
+  --dsw-alias-label-secondary: #b6bac4;
+  --dsw-alias-label-tertiary: #8b8f9a;
+  --dsw-alias-label-caption: #767a85;
+  --dsw-alias-label-dimmed: #5f636d;
+  --dsw-alias-interactive-bg-hover: #1d2027;
+  --dsw-alias-interactive-bg-active: #23262f;
+  --dsw-alias-button-info-fill: #4d6bfe;
+  --dsw-alias-button-info-hover: #5f7bff;
+  --dsw-alias-state-success-primary: #3ecf8e;
+  --dsw-alias-state-error-primary: #ff5f56;
+  --dsw-alias-state-error-secondary: #ff8a84;
+  --dsw-alias-state-business-primary: #4d6bfe;
+  --dsw-alias-tooltip-bg: #22252c;
+  color-scheme: dark;
+}

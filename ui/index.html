@@ -1,0 +1,40 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DSH Pet 设置</title>
+    <link rel="stylesheet" href="./settings.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="title">
+        <span class="dot"></span>
+        <h1>桌宠配置</h1>
+      </div>
+      <div class="actions">
+        <input id="search" class="search" type="search" placeholder="搜索设置…" autocomplete="off" />
+        <span id="status" class="status"></span>
+        <button id="sync" class="btn ghost" type="button">恢复默认</button>
+        <button id="save" class="btn primary" type="button">保存</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-head">
+          <span>宠物列表</span>
+          <button id="add" class="btn tiny" type="button">添加宠物</button>
+        </div>
+        <div id="pet-list" class="pet-list"></div>
+        <p id="extra-hint" class="hint hidden"></p>
+      </aside>
+
+      <section id="content" class="content">
+        <p class="loading">正在加载配置…</p>
+      </section>
+    </main>
+
+    <script src="./settings.js"></script>
+  </body>
+</html>

@@ -1,0 +1,41 @@
+﻿{
+    "name":  "dsh-pet-app",
+    "productName":  "DSH Pet",
+    "version":  "0.1.0",
+    "private":  true,
+    "description":  "把 dsh-pet 桌宠做成独立 Windows 软件：不打开 DSH 也能运行，右键菜单可打开设置窗口。",
+    "license":  "MIT",
+    "author":  {
+                   "name":  "等鱼的心跳",
+                   "email":  "li3095467297cn@gmail.com"
+               },
+    "type":  "module",
+    "main":  "src/main.mjs",
+    "engines":  {
+                    "node":  ">=20"
+                },
+    "keywords":  [
+                     "desktop-pet",
+                     "electron",
+                     "dsh-pet",
+                     "windows",
+                     "transparent-window"
+                 ],
+    "repository":  {
+                       "type":  "git",
+                       "url":  "https://github.com/Prisetess/dsh-pet-app.git"
+                   },
+    "scripts":  {
+                    "vendor":  "node scripts/prepare.mjs",
+                    "start":  "node scripts/prepare.mjs \u0026\u0026 node scripts/start.mjs",
+                    "selfcheck":  "node scripts/prepare.mjs \u0026\u0026 node scripts/selfcheck.mjs",
+                    "smoke":  "node scripts/gui-smoke.mjs",
+                    "package":  "node scripts/package-portable.mjs",
+                    "build:ui-react":  "node scripts/build-ui-react.mjs",
+                    "dist":  "node scripts/prepare.mjs \u0026\u0026 node scripts/package-portable.mjs \u0026\u0026 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-launcher.ps1 \u0026\u0026 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/sign-portable.ps1 -Exe \"dist/DSH Pet/DSH Pet.exe\"",
+                    "sign":  "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/sign-portable.ps1",
+                    "launcher":  "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-launcher.ps1",
+                    "deploy":  "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/deploy-local.ps1",
+                    "installer":  "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-installer.ps1"
+                }
+}

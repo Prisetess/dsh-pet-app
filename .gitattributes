@@ -1,0 +1,18 @@
+# 统一换行，避免 Windows 脚本在别人机器上出现 CRLF/LF 混乱
+* text=auto eol=lf
+
+# Windows 脚本与 C# 源码保持 CRLF（PowerShell 5.1 对 LF 的 .ps1 偶发解析问题）
+*.ps1  text eol=crlf
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+*.cs   text eol=crlf
+
+# 二进制资源不做任何转换
+*.png  binary
+*.ico  binary
+*.webm binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.woff binary
+*.woff2 binary

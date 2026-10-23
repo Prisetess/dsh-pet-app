@@ -1,0 +1,53 @@
+name: verify
+
+# 这个 workflow 不产出安装包（需要 200MB 的 Electron 运行时，放在 Releases 里），
+# 只做两件事：
+#   1. 干净环境里 `npm run vendor` 能不能跑通 —— 检验 dsh-pet 上游有没有改坏我们的补丁锚点
+#   2. 所有 JS 能否过语法检查
+# 上游改了菜单结构时，这里会红，提醒维护者更新 scripts/prepare.mjs 的锚点。
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  vendor-and-lint:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 干净机器上没有 ~/.dsh 插件，prepare.mjs 会走 npm pack 从 registry 拉 dsh-pet
+      - name: Vendor the dsh-pet plugin (applies our patches)
+        run: npm run vendor
+
+      - name: Assert patches landed
+        shell: pwsh
+        run: |
+          $sprite = 'vendor/plugin/runtime/electron-helper/sprite.js'
+          $host = 'vendor/plugin/lib/index.js'
+          foreach ($probe in @(
+            @{ File = $sprite; Needle = "action: 'settings'"; Label = 'sprite menu: settings' },
+            @{ File = $sprite; Needle = 'size-larger'; Label = 'sprite menu: size submenu' },
+            @{ File = $host;   Needle = 'DSH_PET_EMBEDDED'; Label = 'host: embedded mode' }
+          )) {
+            if (-not (Select-String -Path $probe.File -Pattern $probe.Needle -SimpleMatch -Quiet)) {
+              throw "patch missing: $($probe.Label)"
+            }
+            Write-Host "ok: $($probe.Label)"
+          }
+
+      - name: Syntax check (node --check)
+        shell: pwsh
+        run: |
+          $files = Get-ChildItem src, scripts -Recurse -File -Include *.mjs, *.cjs
+          foreach ($f in $files) {
+            node --check $f.FullName
+            if ($LASTEXITCODE -ne 0) { throw "syntax error: $($f.FullName)" }
+          }
+          Write-Host "checked $($files.Count) files"
