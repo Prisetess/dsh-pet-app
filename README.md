@@ -4,6 +4,12 @@
   <img src="docs/hero.png" width="360" alt="DSH Pet 桌宠" />
 </p>
 
+<p align="center">
+  <a href="https://github.com/Prisetess/dsh-pet-app/actions/workflows/verify.yml"><img src="https://github.com/Prisetess/dsh-pet-app/actions/workflows/verify.yml/badge.svg" alt="verify" /></a>
+  <img src="https://img.shields.io/badge/platform-Windows%2010%2F11-0078D4" alt="Windows 10/11" />
+  <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT" />
+</p>
+
 把 `dsh-pet` 桌宠从 DSH 插件变成**不打开 DSH 也能双击运行**的 Windows 软件：
 
 - 透明置顶桌宠窗口，拖拽 / 甩抛 / 物理弹跳 / 多开 / 右键动作点播全部保留；
